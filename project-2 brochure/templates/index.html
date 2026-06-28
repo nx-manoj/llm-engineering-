@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Brochure AI - Premium Generator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Markdown Parser CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- html2pdf.js for client-side PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            /* Theme variables: Dark mode (default) */
+            --bg-primary: #080c14;
+            --bg-secondary: #0f172a;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --bg-card-hover: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(99, 102, 241, 0.3);
+            
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            
+            --accent-primary: #6366f1;
+            --accent-secondary: #a855f7;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --accent-glow: rgba(99, 102, 241, 0.2);
+            
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+            
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+        }
+
+        [data-theme="light"] {
+            /* Theme variables: Light mode */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --bg-card-hover: rgba(255, 255, 255, 0.95);
+            --border-color: rgba(0, 0, 0, 0.08);
+            --border-hover: rgba(79, 70, 229, 0.3);
+            
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            
+            --accent-primary: #4f46e5;
+            --accent-secondary: #7c3aed;
+            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --accent-glow: rgba(79, 70, 229, 0.1);
+            
+            --shadow-glow: 0 0 20px rgba(79, 70, 229, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Header Navigation */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 2rem;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
+
+        .logo-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-tag {
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: rgba(99, 102, 241, 0.15);
+            color: var(--accent-primary);
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+            margin-left: 0.25rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            background-color: rgba(255, 255, 255, 0.02);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Main Content Layout */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            padding: 2rem;
+            gap: 2rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Control Card */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:focus-within::before, .card.active::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Provider Selector (Radio Buttons styled as pills) */
+        .provider-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .provider-option {
+            position: relative;
+        }
+
+        .provider-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .provider-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .provider-label .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .provider-label .badge {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 9999px;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        .provider-option input[type="radio"]:checked + .provider-label {
+            border-color: var(--accent-primary);
+            background-color: var(--accent-glow);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .provider-option input[type="radio"]:checked + .provider-label .name {
+            color: var(--accent-primary);
+        }
+
+        .badge-ollama {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-gemini {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* Generate Button */
+        .btn-generate {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            box-shadow: var(--shadow-glow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .btn-generate:disabled {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Spinner Animation */
+        .spinner {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Steps & Progress Card */
+        .progress-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .step-item.active {
+            opacity: 1;
+        }
+
+        .step-item.done {
+            opacity: 0.85;
+        }
+
+        .step-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .step-item.active .step-icon {
+            border-color: var(--accent-primary);
+            background-color: var(--accent-glow);
+            color: var(--accent-primary);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .step-item.done .step-icon {
+            border-color: var(--success);
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .step-item.error .step-icon {
+            border-color: var(--error);
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .step-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .step-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Scraper Realtime Terminal */
+        .terminal-container {
+            background-color: #020617;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #38bdf8;
+            max-height: 180px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .terminal-line {
+            line-height: 1.4;
+            word-break: break-all;
+        }
+
+        .terminal-line.info { color: #f8fafc; }
+        .terminal-line.success { color: #34d399; }
+        .terminal-line.error { color: #f87171; }
+        .terminal-line.warn { color: #fbbf24; }
+
+        /* Output Workspace Pane */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-height: 600px;
+        }
+
+        .output-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Tabs list */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.15);
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Tab Contents */
+        .tab-content {
+            display: none;
+            flex: 1;
+            min-height: 450px;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brochure-viewer {
+            padding: 0.5rem;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            overflow-y: auto;
+        }
+
+        /* Markdown styling inside output viewer */
+        .markdown-body {
+            color: var(--text-primary);
+        }
+
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .markdown-body h1 {
+            font-size: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 0.25rem;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.2rem;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1.25rem;
+        }
+
+        .markdown-body ul, .markdown-body ol {
+            margin-bottom: 1.25rem;
+            padding-left: 1.5rem;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.4rem;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid var(--accent-primary);
+            background-color: rgba(99, 102, 241, 0.05);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            margin-bottom: 1.25rem;
+            font-style: italic;
+        }
+
+        .markdown-body strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Markdown code blocks */
+        .markdown-body pre {
+            background-color: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            margin-bottom: 1.25rem;
+        }
+
+        .markdown-body code {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .markdown-body pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* Source Code view */
+        .source-textarea {
+            width: 100%;
+            height: 500px;
+            background-color: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            outline: none;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .source-textarea:focus {
+            border-color: var(--accent-primary);
+        }
+
+        /* Action Buttons bar */
+        .action-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action:hover {
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-action svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Insights grid */
+        .insights-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .insights-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .insight-card {
+            background-color: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .insight-num {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+        }
+
+        .insight-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .links-list-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.75rem;
+        }
+
+        .links-list-table th, .links-list-table td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .links-list-table th {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .links-list-table td {
+            font-size: 0.9rem;
+        }
+
+        .links-list-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.01);
+        }
+
+        .badge-type {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            text-transform: capitalize;
+        }
+
+        .badge-about { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .badge-careers { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-company { background-color: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2); }
+        .badge-other { background-color: rgba(107, 114, 128, 0.15); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.2); }
+
+        .link-url {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .link-url:hover {
+            color: var(--accent-primary);
+            text-decoration: underline;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 380px;
+            color: var(--text-muted);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            margin-top: 1rem;
+        }
+
+        .empty-state-icon {
+            width: 4rem;
+            height: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            font-size: 0.9rem;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+        .toast.info { border-left-color: var(--info); }
+        .toast.warn { border-left-color: var(--warning); }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+            </div>
+            <div>
+                <span class="logo-title">AURA</span>
+                <span class="logo-tag">Brochure AI</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <!-- Theme Toggle -->
+            <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle dark/light theme">
+                <!-- Sun Icon (visible in dark) -->
+                <svg id="sunIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <!-- Moon Icon (visible in light) -->
+                <svg id="moonIcon" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main>
+        
+        <!-- Left Sidebar Controls -->
+        <div class="sidebar">
+            
+            <!-- Parameters Card -->
+            <div class="card" id="settingsCard">
+                <h2 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    Generator Settings
+                </h2>
+                
+                <form id="generatorForm" onsubmit="event.preventDefault(); startGeneration();">
+                    <div class="form-group">
+                        <label class="form-label" for="companyName">Company Name</label>
+                        <input type="text" id="companyName" class="form-input" placeholder="e.g. OpenAI" required value="OpenAI">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="websiteUrl">Website URL</label>
+                        <input type="url" id="websiteUrl" class="form-input" placeholder="https://example.com" required value="https://openai.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">AI Provider</label>
+                        <div class="provider-grid">
+                            <div class="provider-option">
+                                <input type="radio" id="provOllama" name="provider" value="ollama" checked onchange="updateModelsList()">
+                                <label for="provOllama" class="provider-label">
+                                    <span class="name">Ollama</span>
+                                    <span class="badge badge-ollama">Local</span>
+                                </label>
+                            </div>
+                            <div class="provider-option" style="opacity: 0.5; cursor: not-allowed;">
+                                <input type="radio" id="provGemini" name="provider" value="gemini" disabled>
+                                <label for="provGemini" class="provider-label" style="cursor: not-allowed;">
+                                    <span class="name" style="color: var(--text-muted);">Gemini</span>
+                                    <span class="badge" id="geminiBadge" style="background-color: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid var(--border-color);">Coming Soon</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="modelSelect">LLM Model</label>
+                        <select id="modelSelect" class="form-input">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-generate">
+                        <div class="spinner" id="btnSpinner"></div>
+                        <span id="btnText">Generate Brochure</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Progress Tracking Console -->
+            <div class="card" id="consoleCard">
+                <h2 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                    Pipeline Status
+                </h2>
+                
+                <div class="progress-list">
+                    <div class="step-item" id="stepScrape">
+                        <div class="step-icon">1</div>
+                        <div class="step-text">
+                            <span class="step-title">Scraping Page</span>
+                            <span class="step-subtitle">Extract text and metadata</span>
+                        </div>
+                    </div>
+                    <div class="step-item" id="stepAnalyze">
+                        <div class="step-icon">2</div>
+                        <div class="step-text">
+                            <span class="step-title">Evaluating Links</span>
+                            <span class="step-subtitle">Identify subpages via AI</span>
+                        </div>
+                    </div>
+                    <div class="step-item" id="stepGenerate">
+                        <div class="step-icon">3</div>
+                        <div class="step-text">
+                            <span class="step-title">Synthesizing Brochure</span>
+                            <span class="step-subtitle">Stream copy generation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-label" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Terminal Logs</div>
+                <div class="terminal-container" id="terminalConsole">
+                    <div class="terminal-line info">Ready to generate. Enter parameters and hit Generate.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Workspace Pane -->
+        <div class="card workspace" id="outputCard">
+            
+            <div class="output-header-bar">
+                <!-- Navigation Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('tabBrochure')">Brochure Preview</button>
+                    <button class="tab-btn" onclick="switchTab('tabMarkdown')">Raw Markdown</button>
+                    <button class="tab-btn" onclick="switchTab('tabInsights')">Scraped Insights</button>
+                </div>
+
+                <!-- Action Button Group -->
+                <div class="action-group">
+                    <button class="btn-action" id="copyBtn" onclick="copyToClipboard()" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy
+                    </button>
+                    <button class="btn-action" id="downloadBtn" onclick="downloadMarkdown()" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Markdown
+                    </button>
+                    <button class="btn-action" id="downloadPdfBtn" onclick="downloadPDF()" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Brochure Preview -->
+            <div class="tab-content active" id="tabBrochure">
+                <div class="brochure-viewer markdown-body" id="brochureViewer">
+                    <div class="empty-state" id="brochureEmpty">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        <h3>No Brochure Generated Yet</h3>
+                        <p>Configure settings and generate a brochure to view the rendered result here.</p>
+                    </div>
+                    <div id="renderedBrochureContent"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Raw Markdown -->
+            <div class="tab-content" id="tabMarkdown">
+                <textarea class="source-textarea" id="markdownSource" readonly placeholder="Markdown code will appear here..."></textarea>
+            </div>
+
+            <!-- Tab: Scraped Insights -->
+            <div class="tab-content" id="tabInsights">
+                <div class="insights-panel">
+                    <div class="insights-summary">
+                        <div class="insight-card">
+                            <div class="insight-num" id="insightRawLinkCount">0</div>
+                            <div class="insight-label">Raw Links Found</div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-num" id="insightFilteredLinkCount">0</div>
+                            <div class="insight-label">Relevant Pages Selected</div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-num" id="insightCharCount">0</div>
+                            <div class="insight-label">Estimated Scrape Size (chars)</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <h3 class="form-label">Targeted Company Pages</h3>
+                        <div style="overflow-x: auto;">
+                            <table class="links-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Page Type</th>
+                                        <th>Target URL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="insightsLinksBody">
+                                    <tr>
+                                        <td colspan="2" style="text-align: center; color: var(--text-muted); font-style: italic;">
+                                            No links analyzed yet
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // System variables
+        let isGenerating = false;
+        let eventSource = null;
+        let brochureContent = "";
+        let sysStatus = {
+            gemini_available: false,
+            default_ollama_model: 'llama3.2-8k',
+            default_gemini_model: 'gemini-2.5-flash'
+        };
+
+        // DOM elements
+        const htmlElement = document.documentElement;
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const sunIcon = document.getElementById("sunIcon");
+        const moonIcon = document.getElementById("moonIcon");
+        const submitBtn = document.getElementById("submitBtn");
+        const btnSpinner = document.getElementById("btnSpinner");
+        const btnText = document.getElementById("btnText");
+        const terminalConsole = document.getElementById("terminalConsole");
+        const brochureEmpty = document.getElementById("brochureEmpty");
+        const renderedBrochureContent = document.getElementById("renderedBrochureContent");
+        const markdownSource = document.getElementById("markdownSource");
+        const copyBtn = document.getElementById("copyBtn");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+        const modelSelect = document.getElementById("modelSelect");
+        
+        // Progress steps elements
+        const stepScrape = document.getElementById("stepScrape");
+        const stepAnalyze = document.getElementById("stepAnalyze");
+        const stepGenerate = document.getElementById("stepGenerate");
+
+        // Insights elements
+        const insightRawLinkCount = document.getElementById("insightRawLinkCount");
+        const insightFilteredLinkCount = document.getElementById("insightFilteredLinkCount");
+        const insightCharCount = document.getElementById("insightCharCount");
+        const insightsLinksBody = document.getElementById("insightsLinksBody");
+
+        // Theme Toggle Handler
+        themeToggleBtn.addEventListener("click", () => {
+            const currentTheme = htmlElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            htmlElement.setAttribute("data-theme", newTheme);
+            
+            if (newTheme === "light") {
+                sunIcon.style.display = "none";
+                moonIcon.style.display = "block";
+            } else {
+                sunIcon.style.display = "block";
+                moonIcon.style.display = "none";
+            }
+        });
+
+        // Initialize and load system configuration
+        async function fetchConfig() {
+            try {
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    sysStatus = await response.json();
+                    updateGeminiBadge();
+                    updateModelsList();
+                }
+            } catch (err) {
+                logTerminal("Failed to reach Flask API status configuration. Running on defaults.", "warn");
+            }
+        }
+
+        function updateGeminiBadge() {
+            // Gemini is set to 'Coming Soon' on the frontend
+            const geminiBadge = document.getElementById("geminiBadge");
+            if (geminiBadge) {
+                geminiBadge.textContent = "Coming Soon";
+                geminiBadge.className = "badge";
+                geminiBadge.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
+                geminiBadge.style.color = "var(--text-muted)";
+                geminiBadge.style.border = "1px solid var(--border-color)";
+            }
+        }
+
+        function updateModelsList() {
+            const provider = document.querySelector('input[name="provider"]:checked').value;
+            modelSelect.innerHTML = "";
+
+            if (provider === 'gemini') {
+                const geminiModels = [
+                    { value: "gemini-2.5-flash", text: "Gemini 2.5 Flash (Fast & General)" },
+                    { value: "gemini-2.5-pro", text: "Gemini 2.5 Pro (High Intelligence)" }
+                ];
+                geminiModels.forEach(m => {
+                    const opt = document.createElement("option");
+                    opt.value = m.value;
+                    opt.textContent = m.text;
+                    modelSelect.appendChild(opt);
+                });
+                if (!sysStatus.gemini_available) {
+                    logTerminal("Warning: GEMINI_API_KEY is not set in your .env. Cloud generation will fail.", "warn");
+                }
+            } else {
+                // Ollama
+                const ollamaModels = [
+                    { value: "llama3.2-8k", text: "llama3.2-8k (Local Custom)" },
+                    { value: "llama3.2", text: "llama3.2 (Ollama Default)" },
+                    { value: "llama3", text: "llama3 (Ollama)" },
+                    { value: "mistral", text: "mistral (Ollama)" }
+                ];
+                ollamaModels.forEach(m => {
+                    const opt = document.createElement("option");
+                    opt.value = m.value;
+                    opt.textContent = m.text;
+                    modelSelect.appendChild(opt);
+                });
+            }
+        }
+
+        // Terminal Log Helper
+        function logTerminal(message, type = "info") {
+            const timeStr = new Date().toLocaleTimeString();
+            const line = document.createElement("div");
+            line.className = `terminal-line ${type}`;
+            line.textContent = `[${timeStr}] ${message}`;
+            terminalConsole.appendChild(line);
+            terminalConsole.scrollTop = terminalConsole.scrollHeight;
+        }
+
+        // Switch Workspace Tab
+        function switchTab(tabId) {
+            // Remove active class from all tabs
+            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
+
+            // Find clicked tab button
+            const triggerBtn = Array.from(document.querySelectorAll(".tab-btn")).find(btn => 
+                btn.getAttribute("onclick").includes(tabId)
+            );
+            if (triggerBtn) triggerBtn.classList.add("active");
+
+            // Show active content
+            const content = document.getElementById(tabId);
+            if (content) content.classList.add("active");
+        }
+
+        // Reset Pipeline UI Steps
+        function resetPipelineSteps() {
+            [stepScrape, stepAnalyze, stepGenerate].forEach(step => {
+                step.classList.remove("active", "done", "error");
+            });
+            insightsLinksBody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--text-muted); font-style: italic;">No links analyzed yet</td></tr>`;
+            insightRawLinkCount.textContent = "0";
+            insightFilteredLinkCount.textContent = "0";
+            insightCharCount.textContent = "0";
+        }
+
+        // Core Generation Controller
+        function startGeneration() {
+            if (isGenerating) return;
+
+            const companyName = document.getElementById("companyName").value.trim();
+            const websiteUrl = document.getElementById("websiteUrl").value.trim();
+            const provider = document.querySelector('input[name="provider"]:checked').value;
+            const modelName = modelSelect.value;
+
+            if (!companyName || !websiteUrl) {
+                showToast("Please fill in all required fields", "warn");
+                return;
+            }
+
+            isGenerating = true;
+            brochureContent = "";
+            
+            // Set UI Loading State
+            submitBtn.disabled = true;
+            btnSpinner.style.display = "block";
+            btnText.textContent = "Generating...";
+            
+            brochureEmpty.style.display = "none";
+            renderedBrochureContent.innerHTML = "<p style='color: var(--text-secondary); font-style: italic;'>Awaiting stream...</p>";
+            markdownSource.value = "";
+            copyBtn.disabled = true;
+            downloadBtn.disabled = true;
+            downloadPdfBtn.disabled = true;
+
+            resetPipelineSteps();
+            switchTab('tabBrochure');
+
+            // Open Server-Sent Events Endpoint
+            terminalConsole.innerHTML = "";
+            logTerminal(`Initiating generation pipeline for ${companyName} (${websiteUrl})`, "info");
+            logTerminal(`Using provider: ${provider.toUpperCase()} | Model: ${modelName}`, "info");
+            
+            stepScrape.classList.add("active");
+
+            const queryParams = new URLSearchParams({
+                company_name: companyName,
+                url: websiteUrl,
+                provider: provider,
+                model: modelName
+            });
+
+            eventSource = new EventSource(`/api/generate?${queryParams.toString()}`);
+
+            eventSource.addEventListener('progress', (e) => {
+                const data = JSON.parse(e.data);
+                logTerminal(data.message, "info");
+                
+                // Advance steps dynamically based on messages
+                if (data.message.includes("Extracted")) {
+                    stepScrape.classList.remove("active");
+                    stepScrape.classList.add("done");
+                    stepAnalyze.classList.add("active");
+
+                    // Approximate character count based on typical content return
+                    insightCharCount.textContent = "2,000";
+                    const match = data.message.match(/Extracted (\d+) raw links/);
+                    if (match) {
+                        insightRawLinkCount.textContent = match[1];
+                    }
+                }
+                if (data.message.includes("Compiling research")) {
+                    stepAnalyze.classList.remove("active");
+                    stepAnalyze.classList.add("done");
+                    stepGenerate.classList.add("active");
+                }
+            });
+
+            eventSource.addEventListener('links', (e) => {
+                const data = JSON.parse(e.data);
+                const links = data.links || [];
+                logTerminal(`AI selected ${links.length} relevant subpages to research.`, "success");
+                insightFilteredLinkCount.textContent = links.length;
+
+                if (links.length > 0) {
+                    insightsLinksBody.innerHTML = "";
+                    links.forEach(link => {
+                        const tr = document.createElement("tr");
+                        
+                        let badgeClass = "badge-other";
+                        if (link.type.includes("about")) badgeClass = "badge-about";
+                        else if (link.type.includes("career") || link.type.includes("job")) badgeClass = "badge-careers";
+                        else if (link.type.includes("company") || link.type.includes("product")) badgeClass = "badge-company";
+
+                        tr.innerHTML = `
+                            <td><span class="badge-type ${badgeClass}">${link.type}</span></td>
+                            <td><a href="${link.url}" target="_blank" class="link-url">${link.url}</a></td>
+                        `;
+                        insightsLinksBody.appendChild(tr);
+                    });
+                } else {
+                    insightsLinksBody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--text-secondary); font-style: italic;">No relevant subpages identified. Just using the homepage content.</td></tr>`;
+                }
+            });
+
+            eventSource.addEventListener('content', (e) => {
+                const data = JSON.parse(e.data);
+                brochureContent += data.text;
+                
+                // Real-time render markdown
+                renderedBrochureContent.innerHTML = marked.parse(brochureContent);
+                markdownSource.value = brochureContent;
+            });
+
+            eventSource.addEventListener('done', (e) => {
+                const data = JSON.parse(e.data);
+                logTerminal(data.message, "success");
+                
+                stepGenerate.classList.remove("active");
+                stepGenerate.classList.add("done");
+                
+                finishGeneration(null);
+            });
+
+            eventSource.addEventListener('error', (e) => {
+                let msg = "A connection error occurred.";
+                if (e.data) {
+                    try {
+                        const data = JSON.parse(e.data);
+                        msg = data.message || msg;
+                    } catch(err) {}
+                }
+                
+                logTerminal(`Error: ${msg}`, "error");
+                
+                // Highlight error in current step
+                if (stepGenerate.classList.contains("active")) {
+                    stepGenerate.classList.remove("active");
+                    stepGenerate.classList.add("error");
+                } else if (stepAnalyze.classList.contains("active")) {
+                    stepAnalyze.classList.remove("active");
+                    stepAnalyze.classList.add("error");
+                } else if (stepScrape.classList.contains("active")) {
+                    stepScrape.classList.remove("active");
+                    stepScrape.classList.add("error");
+                }
+                
+                finishGeneration(msg);
+            });
+        }
+
+        function finishGeneration(errorMsg) {
+            isGenerating = false;
+            
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+
+            // Restore UI Buttons
+            submitBtn.disabled = false;
+            btnSpinner.style.display = "none";
+            btnText.textContent = "Generate Brochure";
+
+            if (errorMsg) {
+                showToast(`Pipeline failed: ${errorMsg}`, "error");
+                if (brochureContent.length === 0) {
+                    brochureEmpty.style.display = "flex";
+                    renderedBrochureContent.innerHTML = "";
+                }
+            } else {
+                showToast("Brochure generated successfully!", "success");
+                copyBtn.disabled = false;
+                downloadBtn.disabled = false;
+                downloadPdfBtn.disabled = false;
+            }
+        }
+
+        // Action Handlers
+        function copyToClipboard() {
+            if (!brochureContent) return;
+            
+            navigator.clipboard.writeText(brochureContent).then(() => {
+                showToast("Copied Markdown to clipboard!", "success");
+            }).catch(err => {
+                showToast("Failed to copy text.", "error");
+            });
+        }
+
+        function downloadMarkdown() {
+            if (!brochureContent) return;
+            
+            const companyName = document.getElementById("companyName").value.trim() || "company";
+            const blob = new Blob([brochureContent], { type: 'text/markdown;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `${companyName.toLowerCase()}_brochure.md`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("Brochure file downloaded!", "success");
+        }
+
+        function downloadPDF() {
+            if (!brochureContent) return;
+            
+            const companyName = document.getElementById("companyName").value.trim() || "company";
+            showToast("Generating PDF, please wait...", "info");
+
+            // Format settings for html2pdf
+            const opt = {
+                margin:       [0.6, 0.6, 0.6, 0.6], // inches [top, left, bottom, right]
+                filename:     `${companyName.toLowerCase()}_brochure.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Create a clean off-screen wrapper for PDF print styling
+            const printWrapper = document.createElement('div');
+            printWrapper.className = 'markdown-body';
+            
+            // Override styles for high-fidelity white background paper print representation
+            printWrapper.style.color = '#1e293b'; // dark text slate-800
+            printWrapper.style.backgroundColor = '#ffffff'; // white paper bg
+            printWrapper.style.fontFamily = "'Inter', sans-serif";
+            printWrapper.style.padding = '20px';
+            
+            // Add custom style tag to printWrapper to ensure clean PDF layout
+            const styleTag = document.createElement('style');
+            styleTag.innerHTML = `
+                h1, h2, h3 { font-family: 'Outfit', sans-serif; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 700; }
+                h1 { font-size: 2.2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 1.5rem; }
+                h2 { font-size: 1.6rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+                h3 { font-size: 1.2rem; }
+                p { margin-bottom: 1rem; line-height: 1.6; }
+                ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+                li { margin-bottom: 0.25rem; }
+                blockquote { border-left: 4px solid #4f46e5; background-color: #f1f5f9; padding: 10px 15px; margin-bottom: 1rem; font-style: italic; }
+                strong { color: #0f172a; }
+                pre { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; overflow-x: auto; margin-bottom: 1rem; }
+                code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background-color: #f1f5f9; padding: 2px 4px; border-radius: 4px; color: #0f172a; }
+            `;
+            printWrapper.appendChild(styleTag);
+            
+            // Append the actual brochure content
+            const contentDiv = document.createElement('div');
+            contentDiv.innerHTML = marked.parse(brochureContent);
+            printWrapper.appendChild(contentDiv);
+
+            // Execute PDF generation
+            html2pdf().set(opt).from(printWrapper).save().then(() => {
+                showToast("PDF brochure downloaded!", "success");
+            }).catch(err => {
+                console.error("PDF generation error: ", err);
+                showToast("Failed to generate PDF.", "error");
+            });
+        }
+
+        // Toast Helper
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            
+            let iconSvg = '';
+            if (type === 'success') {
+                iconSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            } else if (type === 'error') {
+                iconSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            } else {
+                iconSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+            }
+
+            toast.innerHTML = `${iconSvg} <span>${message}</span>`;
+            container.appendChild(toast);
+
+            // Trigger animation
+            setTimeout(() => toast.classList.add("show"), 10);
+
+            // Remove toast after 4 seconds
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Initial Load
+        fetchConfig();
+    </script>
+</body>
+</html>
